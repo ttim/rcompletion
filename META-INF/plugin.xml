@@ -1,0 +1,24 @@
+<idea-plugin version="2">
+    <name>Runtime java completion</name>
+    <description>Runtime completion</description>
+    <version>0.1</version>
+    <vendor>SPbSU</vendor>
+    <idea-version since-build="8000"/>
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <completion.contributor implementationClass="ru.abishev.RuntimeCompletion" id="runtime-completion" language="JAVA"/>
+        <!-- Add your extensions here -->
+    </extensions>
+</idea-plugin>
