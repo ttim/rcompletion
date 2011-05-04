@@ -15,6 +15,16 @@ import static ru.abishev.utils.CollectionUtils.newArrayList;
 public class JavaCompletionProvider implements ICompletionProvider {
     private final IJavaClassCreator JAVA_CLASS_CREATOR = new StupidJavaClassCreator();
 
+    private Method getMethod(Class clazz) {
+        for (Method method : clazz.getMethods()) {
+            if ("getCompletionList".equals(method.getName())) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
     public List<String> getCompletions(Project project, PsiClassType clazz, PsiClassType... generics) {
         List<String> completions = newArrayList();
 
@@ -29,8 +39,10 @@ public class JavaCompletionProvider implements ICompletionProvider {
 
         if (completionObject != null) {
             try {
-                Method method = completionObject.getClass().getMethod("getCompletionList", genericObjectClasses);
-                completions = (List<String>) method.invoke(completionObject, genericObjects);
+                Method method = getMethod(completionObject.getClass());
+                if (method != null) {
+                    completions = (List<String>) method.invoke(completionObject, genericObjects);
+                }
             } catch (Exception e) {
                 // todo: ?
                 System.out.println(e);
