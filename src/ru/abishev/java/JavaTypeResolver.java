@@ -1,18 +1,13 @@
-package ru.abishev.utils;
+package ru.abishev.java;
 
 import com.intellij.psi.*;
-import org.jetbrains.annotations.Nullable;
+import ru.abishev.spec.TypeResolver;
 
 /**
  * @author Timur Abishev (timur@abishev.ru)
  */
-public class PsiUtils {
-    @Nullable
-    public static PsiClassType resolveCurrentVariablePsiClassType(PsiElement position) {
-//        if (!(position instanceof PsiIdentifier)) {
-//            return null;
-//        }
-//
+public class JavaTypeResolver implements TypeResolver {
+    public PsiClassType resolveType(PsiElement position) {
         if (!(position.getParent() instanceof PsiReferenceExpression)) {
             return null;
         }

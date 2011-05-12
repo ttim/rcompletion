@@ -9,17 +9,30 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiType;
 import org.jetbrains.annotations.NotNull;
-import ru.abishev.java.JavaCompletionProvider;
+import ru.abishev.groovy.GroovyCompletionProvider;
+import ru.abishev.groovy.GroovyTypeResolver;
+import ru.abishev.java.JavaTypeResolver;
+import ru.abishev.jvm.JavaCompletionProvider;
 import ru.abishev.spec.ICompletionProvider;
+import ru.abishev.spec.TypeResolver;
 import ru.abishev.utils.CompletionUtils;
-import ru.abishev.utils.PsiUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RuntimeCompletion extends CompletionContributor {
     private final Logger LOG = Logger.getInstance("ru.abishev.runtimecompetion");
 
-    private final ICompletionProvider JAVA_PROVIDER = new JavaCompletionProvider();
+    private static final Map<String, TypeResolver> TYPE_RESOLVERS = new HashMap<String, TypeResolver>() {{
+        put("JAVA", new JavaTypeResolver());
+        put("Groovy", new GroovyTypeResolver());
+    }};
+
+    private static final Map<String, ICompletionProvider> COMPLETION_PROVIDERS = new HashMap<String, ICompletionProvider>() {{
+        put("JAVA", new JavaCompletionProvider());
+        put("Groovy", new GroovyCompletionProvider());
+    }};
 
     private Project currentProject;
 
@@ -28,11 +41,17 @@ public class RuntimeCompletion extends CompletionContributor {
         currentProject = context.getProject();
     }
 
-
     @Override
     public void fillCompletionVariants(CompletionParameters parameters, CompletionResultSet result) {
         try {
-            PsiClassType type = PsiUtils.resolveCurrentVariablePsiClassType(parameters.getPosition());
+            String languageId = parameters.getOriginalFile().getLanguage().getID();
+            TypeResolver typeResolver = TYPE_RESOLVERS.get(languageId);
+
+            if (typeResolver == null) {
+                return;
+            }
+
+            PsiClassType type = typeResolver.resolveType(parameters.getPosition());
 
             if (type == null) {
                 return;
@@ -46,7 +65,12 @@ public class RuntimeCompletion extends CompletionContributor {
                 args[i++] = (PsiClassType) _type;
             }
 
-            List<String> completions = JAVA_PROVIDER.getCompletions(currentProject, type, args);
+            ICompletionProvider completionProvider = COMPLETION_PROVIDERS.get(languageId);
+            if (completionProvider == null) {
+                return;
+            }
+
+            List<String> completions = completionProvider.getCompletions(currentProject, type, args);
 
             result.addAllElements(CompletionUtils.getCompletionsFromStrings(completions));
         } catch (Exception e) {

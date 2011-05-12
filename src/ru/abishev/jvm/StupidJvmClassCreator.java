@@ -1,4 +1,4 @@
-package ru.abishev.java;
+package ru.abishev.jvm;
 
 import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.openapi.project.Project;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Timur Abishev (timur@abishev.ru)
  */
-public class StupidJavaClassCreator implements IJavaClassCreator {
+public class StupidJvmClassCreator implements JvmClassCreator {
     private List<String> classLoaderList = null;
     private ClassLoader classLoader = null;
 
@@ -64,6 +64,8 @@ public class StupidJavaClassCreator implements IJavaClassCreator {
         Class _clazz = getPsiClassClazz(clazz, project);
         try {
             return _clazz.newInstance();
+        } catch (Error e) {
+            return null;
         } catch (Exception e) {
             return null;
         }
@@ -73,6 +75,4 @@ public class StupidJavaClassCreator implements IJavaClassCreator {
         classLoader = null;
         classLoaderList = null;
     }
-
-
 }
